@@ -1,6 +1,7 @@
 import express from "express";
 
 import { verificarToken } from "../middlewares/auth.middleware";
+import { validarRol } from "../middlewares/role.middleware";
 
 import {
   registrarSalida,
@@ -25,6 +26,7 @@ router.post(
 router.get(
   "/",
   verificarToken,
+  validarRol(["ADMIN", "USER"]),
   obtenerMovimientos
 );
 

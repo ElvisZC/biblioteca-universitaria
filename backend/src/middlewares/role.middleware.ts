@@ -13,14 +13,22 @@ export const validarRol = (rolesPermitidos: string[]) => {
       });
     }
 
+    if (!user.rol) {
+      return res.status(403).json({
+        ok: false,
+        message: "Rol no definido"
+      });
+    }
+
     if (!rolesPermitidos.includes(user.rol)) {
       return res.status(403).json({
         ok: false,
-        message: "No tienes permisos"
+        message: "No tienes permisos para esta acción"
       });
     }
 
     next();
+
   };
 
 };

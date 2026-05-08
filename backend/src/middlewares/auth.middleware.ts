@@ -1,8 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-const SECRET = process.env.JWT_SECRET || "secret_dev_key";
-
 export const verificarToken = (
   req: Request,
   res: Response,
@@ -11,24 +9,35 @@ export const verificarToken = (
 
   try {
 
-    // 1. leer token del header
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
       return res.status(401).json({
         ok: false,
-        message: "No hay token"
+        message: "Token requerido"
       });
     }
 
-    // 2. quitar "Bearer "
     const token = authHeader.split(" ")[1];
 
-    // 3. verificar token
-    const decoded = jwt.verify(token, SECRET);
+    if (!token) {
+      return res.status(401).json({
+        ok: false,
+        message: "Token inválido"
+      });
+    }
 
-    // 4. guardar usuario en request
-    (req as any).user = decoded;
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET as string
+    ) as jwt.JwtPayload;
+
+    // IMPORTANTE: aseguramos estructura
+    (req as any).user = {
+      id: decoded.id,
+      nombre: decoded.nombre,
+      rol: decoded.rol
+    };
 
     next();
 
@@ -36,7 +45,7 @@ export const verificarToken = (
 
     return res.status(401).json({
       ok: false,
-      message: "Token inválido"
+      message: "Token inválido o expirado"
     });
 
   }
